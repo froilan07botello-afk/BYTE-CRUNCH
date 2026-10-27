@@ -28,7 +28,7 @@
         </h1>
 
         <p class="mt-3 leading-6 text-stone-600">
-            Consulta el estado de los pedidos de nuestra demostración.
+            Consulta el estado de los pedidos de nuestros clientes
         </p>
     </section>
 
