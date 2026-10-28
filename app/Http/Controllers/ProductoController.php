@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use app\Models\Producto;
-
+use App\Models\Producto;
+use Illuminate\View\View;
 class ProductoController extends Controller
 {
     public function index(): View
@@ -13,6 +13,6 @@ class ProductoController extends Controller
             ->orderBy('id')
             ->get();
 
-        return view('churros.catalogo', compact('productos'));
+        return view('churros.catalago', compact('productos'));
     }
 }
