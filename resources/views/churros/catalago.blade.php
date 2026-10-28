@@ -89,26 +89,22 @@
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2
                         lg:grid-cols-3">
 
-                <!-- PRODUCTO 1 -->
-                 <x-tarjeta-producto
-                    nombre="Churro de cajeta"
-                    descripcion="Crujiente por fuera, suave por dentro y relleno de dulce de leche."
-                    precio="25"
-                    emoji="🍯"
+                <!-- PRODUCTOS QUE VIENEN DE NUESTRA BD -->
+                <!-- RECORRE CADA DATO DE LA BD Y LO TRAE PARA MOSTRARLO EN LA VISTA
+                    MEDIANTE EL CICLO FOR ELSE-->
+                @forelse ($productos as $producto)
+                <x-tarjeta-producto
+                    :nombre="$producto->nombre"
+                    :descripcion="$producto->descripcion ?? 'Un delicioso churro preparado para disfrutar.'"
+                    :precio="$producto->precio"
+                    :emoji="'🍩'"
                 />
-                 <x-tarjeta-producto
-                    nombre="Churro de chocolate"
-                    descripcion="Una opción dulce con un delicioso relleno de chocolate."
-                    precio="30"
-                    emoji="🍫"
-                 />
+             @empty
+                <p class="col-span-full rounded-2xl bg-white p-6 text-center text-stone-600">
+                    Por el momento no hay churros disponibles.
+                </p>
+             @endforelse
 
-                  <x-tarjeta-producto
-                    nombre="Churro especial"
-                    descripcion="Un antojo especial para disfrutar de un sabor diferente."
-                    precio="35"
-                    emoji="✨"
-                />
             </div>
         </section>
 
