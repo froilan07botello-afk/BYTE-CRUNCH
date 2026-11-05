@@ -1,5 +1,6 @@
 
 @props([
+    'id',
     'nombre',
     'descripcion',
     'precio',
@@ -28,6 +29,7 @@
             <button
                 type="button"
                 data-agregar
+                data-producto-id="{{$id}}"
                 data-producto="{{ $nombre }}"
                 data-precio="{{ $precio }}"
                 class="min-h-11 rounded-xl bg-amber-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-amber-900 focus:outline-2 focus:outline-offset-2 focus:outline-orange-600"
