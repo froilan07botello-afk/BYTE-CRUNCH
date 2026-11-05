@@ -1,9 +1,5 @@
 @extends('layouts.app')
-
 @section('titulo', 'Catálogo | BYTE & CRUNCH')
-
-@section('content')
-
 @section('content')
 
     <!-- ENCABEZADO -->
@@ -94,6 +90,7 @@
                     MEDIANTE EL CICLO FOR ELSE-->
                 @forelse ($productos as $producto)
                 <x-tarjeta-producto
+                    :id="$producto->id"
                     :nombre="$producto->nombre"
                     :descripcion="$producto->descripcion ?? 'Un delicioso churro preparado para disfrutar.'"
                     :precio="$producto->precio"
@@ -160,130 +157,92 @@
     <p class="mt-2 text-sm text-stone-600">
         Déjanos tus datos para preparar tu pedido.
     </p>
-
-    <form id="form-pedido" class="mt-6 space-y-5">
-
+    <form id="form-pedido" action="{{ route('pedidos.store') }}" method="POST" class="mt-6 space-y-5">
+    @csrf
         <div>
-            <label for="nombre-cliente"
-                class="mb-2 block text-sm font-bold">
-                Nombre completo
+            <label for="nombre-cliente" class="mb-2 block text-sm font-bold">
+            Nombre completo
             </label>
-            <input id="nombre-cliente" name="nombre"
-                type="text" required maxlength="100"
+            <input
+                id="nombre-cliente"
+                name="nombre_cliente"
+                type="text"
+                required
+                maxlength="100"
                 autocomplete="name"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500">
+                value="{{ old('nombre_cliente') }}"
+                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500"
+            >
+            @error('nombre_cliente')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
 
         <div>
-            <label for="telefono-cliente"
-                class="mb-2 block text-sm font-bold">
+             <label for="telefono-cliente" class="mb-2 block text-sm font-bold">
                 Teléfono de contacto
             </label>
-            <input id="telefono-cliente" name="telefono"
-                type="tel" required maxlength="20"
+             <input
+                id="telefono-cliente"
+                name="telefono"
+                type="tel"
+                required
+                maxlength="20"
                 autocomplete="tel"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500">
+                value="{{ old('telefono') }}"
+                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500"
+            >
         </div>
-
+         @error('telefono')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
         <div>
-            <label for="direccion-cliente"
-                class="mb-2 block text-sm font-bold">
+             <label for="direccion-cliente" class="mb-2 block text-sm font-bold">
                 Dirección de entrega
-            </label>
-            <textarea id="direccion-cliente" name="direccion"
-                required maxlength="250" rows="3"
-                autocomplete="street-address"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500"></textarea>
+             </label>
+        <textarea
+            id="direccion-cliente"
+            name="direccion"
+            required
+            maxlength="250"
+            rows="3"
+            autocomplete="street-address"
+            class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500"
+        >{{ old('direccion') }}</textarea>
+        @error('direccion')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
         </div>
 
-        <div>
-            <label for="referencia-cliente"
-                class="mb-2 block text-sm font-bold">
+         <div>
+            <label for="referencia-cliente" class="mb-2 block text-sm font-bold">
                 Referencias para llegar (opcional)
             </label>
-            <input id="referencia-cliente" name="referencia"
-                type="text" maxlength="200"
+            <input
+                id="referencia-cliente"
+                name="referencia"
+                type="text"
+                maxlength="200"
                 placeholder="Ej. Casa junto a la tienda"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500">
+                value="{{ old('referencia') }}"
+                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500"
+            >
+            @error('referencia')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
         </div>
+        <div id="productos-ocultos"></div>
 
-        <button type="submit"
-            class="w-full rounded-xl bg-orange-500 px-6 py-4 font-bold text-white transition hover:bg-orange-600">
-            Confirmar pedido de prueba
-        </button>
+            @error('productos')
+                <p class="text-sm text-red-600">{{ $message }}</p>
+            @enderror
 
-
-    </form>
-</section>
-
-
-<!-- Formulario para completar el pedido -->
-<section id="formulario-pedido"
-    class="mt-8 hidden rounded-2xl border border-orange-200 bg-white p-6">
-
-    <h2 class="text-2xl font-black text-amber-950">
-        Completa tu pedido
-    </h2>
-
-    <p class="mt-2 text-sm text-stone-600">
-        Déjanos tus datos para preparar tu pedido.
-    </p>
-
-    <form id="form-pedido" class="mt-6 space-y-5">
-
-        <div>
-            <label for="nombre-cliente"
-                class="mb-2 block text-sm font-bold">
-                Nombre completo
-            </label>
-            <input id="nombre-cliente" name="nombre"
-                type="text" required maxlength="100"
-                autocomplete="name"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500">
-        </div>
-
-        <div>
-            <label for="telefono-cliente"
-                class="mb-2 block text-sm font-bold">
-                Teléfono de contacto
-            </label>
-            <input id="telefono-cliente" name="telefono"
-                type="tel" required maxlength="20"
-                autocomplete="tel"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500">
-        </div>
-
-        <div>
-            <label for="direccion-cliente"
-                class="mb-2 block text-sm font-bold">
-                Dirección de entrega
-            </label>
-            <textarea id="direccion-cliente" name="direccion"
-                required maxlength="250" rows="3"
-                autocomplete="street-address"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500"></textarea>
-        </div>
-
-        <div>
-            <label for="referencia-cliente"
-                class="mb-2 block text-sm font-bold">
-                Referencias para llegar (opcional)
-            </label>
-            <input id="referencia-cliente" name="referencia"
-                type="text" maxlength="200"
-                placeholder="Ej. Casa junto a la tienda"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 focus:outline-2 focus:outline-orange-500">
-        </div>
-
-        <button type="submit"
-            class="w-full rounded-xl bg-orange-500 px-6 py-4 font-bold text-white transition hover:bg-orange-600">
-            Confirmar pedido de prueba
-        </button>
-
-        <p class="text-xs text-stone-500">
-            Esta es una demostración. El pedido no se envía
-            ni se guarda en un servidor.
-        </p>
+            <button
+                type="submit"
+                class="w-full rounded-xl bg-orange-500 px-6 py-4 font-bold text-white transition hover:bg-orange-600"
+            >
+                Confirmar pedido
+            </button>
     </form>
 </section>
 
@@ -304,8 +263,6 @@
     </p>
 
 </section>
-
-
 
     </main>
 
@@ -376,21 +333,24 @@
 
         document.querySelectorAll('[data-agregar]').forEach((boton) => {
             boton.addEventListener('click', () => {
+                const id= Number(boton.dataset.productoId);
                 const nombre = boton.dataset.producto;
                 const precio = Number(boton.dataset.precio);
 
-                if (!nombre || !Number.isFinite(precio) || precio <= 0) {
+                 if (!Number.isInteger(id) || id <= 0 ||
+                    !nombre || !Number.isFinite(precio) || precio <= 0) {
                     return;
-                }
+                    }
 
                 const existente = carrito.find(
-                    producto => producto.nombre === nombre
+                    producto => producto.id === id
                 );
 
                 if (existente) {
                     existente.cantidad++;
                 } else {
                     carrito.push({
+                        id,
                         nombre,
                         precio,
                         cantidad: 1
@@ -421,93 +381,34 @@
             });
 
 
-formulario.addEventListener('submit', (evento) => {
-    evento.preventDefault();
 
-    if (carrito.length === 0) {
-        mensaje.textContent = 'Agrega un churro antes de confirmar.';
-        mensaje.classList.remove('hidden');
-        return;
-    }
+        formulario.addEventListener('submit', (evento) => {
+        if (carrito.length === 0) {
+            evento.preventDefault();
 
-    const datos = new FormData(formulario);
-
-    const nombre = String(datos.get('nombre') || '').trim();
-    const telefono = String(datos.get('telefono') || '').trim();
-    const direccion = String(datos.get('direccion') || '').trim();
-    const referencia = String(datos.get('referencia') || '').trim();
-
-    if (!nombre || !telefono || !direccion) {
-        return;
-    }
-
-    const total = carrito.reduce(
-        (suma, producto) =>
-            suma + producto.precio * producto.cantidad,
-        0
-    );
-
-    const pedido = {
-        id: Date.now(),
-        nombre,
-        telefono,
-        direccion,
-        referencia,
-        productos: carrito.map((producto) => ({
-            nombre: producto.nombre,
-            precio: producto.precio,
-            cantidad: producto.cantidad
-        })),
-        total,
-        estado: 'Pendiente',
-        fecha: new Date().toLocaleString('es-MX')
-    };
-
-    try {
-        const pedidosGuardados = JSON.parse(
-            localStorage.getItem('byteCrunchPedidos') || '[]'
-        );
-
-        if (!Array.isArray(pedidosGuardados)) {
-            throw new Error('Los datos guardados no son válidos.');
+            mensaje.textContent = 'Agrega un churro antes de confirmar.';
+            mensaje.classList.remove('hidden');
+            return;
         }
 
-        pedidosGuardados.push(pedido);
+        const contenedorProductos = document.getElementById('productos-ocultos');
 
-        localStorage.setItem(
-            'byteCrunchPedidos',
-            JSON.stringify(pedidosGuardados)
-        );
-    } catch (error) {
-        mensaje.textContent =
-            'No se pudo guardar el pedido en este navegador. Inténtalo de nuevo.';
-        mensaje.classList.remove('hidden');
-        return;
-    }
+        // Eliminamos campos anteriores para evitar duplicados.
+        contenedorProductos.replaceChildren();
 
-    mensajeConfirmacion.textContent =
-        `Gracias, ${nombre}. Tu pedido #${pedido.id} por ${dinero(total)} se registró correctamente.`;
+        // Enviamos únicamente el ID y la cantidad de cada producto.
+        carrito.forEach((producto, indice) =>
+        {
+            const inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = `productos[${indice}][id]`;
+            inputId.value = producto.id;
 
-    document.getElementById('estado-pedido').textContent =
-        pedido.estado;
-
-    confirmacion.classList.remove('hidden');
-
-    carrito.length = 0;
-    actualizarCarrito();
-    formulario.reset();
-
-    confirmacion.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-    });
-});
-    </script>
-
-@endsection
-@push('scripts')
-    <script>
-        // Aquí conserva el JavaScript original
-        // que ya controla el carrito.
-    </script>
-@endpush
+            const inputCantidad = document.createElement('input');
+            inputCantidad.type = 'hidden';
+            inputCantidad.name = `productos[${indice}][cantidad]`;
+            inputCantidad.value = producto.cantidad;
+            contenedorProductos.append(inputId, inputCantidad);
+         });
+     });
+ </script>
