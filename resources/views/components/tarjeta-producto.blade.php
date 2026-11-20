@@ -4,7 +4,7 @@
     'nombre',
     'descripcion',
     'precio',
-    'emoji' => '🍩',
+    'emoji' => '',
 ])
 
 <article class="flex flex-col rounded-2xl border border-orange-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
