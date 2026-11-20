@@ -26,7 +26,6 @@
                 Catálogo de Productos
             </h1>
             <p class="mt-2 text-stone-600">
-                Administra los churros disponibles en la tienda, sus precios y descripciones.
             </p>
         </div>
         <a href="{{ route('admin.productos.nuevo') }}" class="inline-flex items-center justify-center rounded-xl bg-orange-600 px-5 py-3 font-bold text-white shadow-sm transition hover:bg-orange-700">

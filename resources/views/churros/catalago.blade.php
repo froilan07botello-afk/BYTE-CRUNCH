@@ -94,7 +94,7 @@
                     :nombre="$producto->nombre"
                     :descripcion="$producto->descripcion ?? 'Un delicioso churro preparado para disfrutar.'"
                     :precio="$producto->precio"
-                    :emoji="'🍩'"
+                    :emoji="''"
                 />
              @empty
                 <p class="col-span-full rounded-2xl bg-white p-6 text-center text-stone-600">
