@@ -5,16 +5,14 @@
 @section('content')
 <header class="border-b border-orange-100 bg-white shadow-sm">
     <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <a href="/" class="text-xl font-black text-amber-950">
+        <a href="{{ route('admin.pedidos.index') }}" class="text-xl font-black text-amber-950">
             BYTE <span class="text-orange-600">&</span> CRUNCH <span class="ml-2 rounded-md bg-orange-100 px-2 py-1 text-xs font-bold text-orange-800">Admin</span>
         </a>
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.pedidos.index') }}" class="rounded-xl border border-stone-300 px-4 py-2 text-sm font-bold text-stone-700 hover:bg-stone-100">
                 Ver Pedidos
             </a>
-            <a href="/" class="rounded-xl bg-amber-950 px-4 py-2 text-sm font-bold text-white hover:bg-amber-900">
-                Ver Tienda
-            </a>
+
         </div>
     </nav>
 </header>

@@ -6,13 +6,33 @@
 <header class="border-b border-orange-100 bg-white shadow-sm">
     <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <a href="/" class="text-xl font-black text-amber-950">
-            BYTE <span class="text-orange-600">&</span> CRUNCH <span class="ml-2 rounded-md bg-orange-100 px-2 py-1 text-xs font-bold text-orange-800">Admin</span>
+            BYTE <span class="text-orange-600">&</span> CRUNCH
         </a>
         <div class="flex items-center gap-3">
-            <a href="/" class="rounded-xl bg-amber-950 px-4 py-2 text-sm font-bold text-white hover:bg-amber-900">
-                Ver Tienda / Catálogo
+            <a href= "{{ route('admin.productos.listar') }}" class="rounded-xl bg-amber-950 px-4 py-2 text-sm font-bold text-white hover:bg-amber-900">
+                Ver Productos
             </a>
         </div>
+            @auth
+            <div class="flex flex-wrap items-center gap-2.5 sm:border-l sm:border-stone-200 sm:pl-4">
+                <span class="rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-stone-800">
+                    {{ auth()->user()->name }}
+                </span>
+
+                <a href="{{ route('profile.edit') }}"
+                class="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 bg-white px-3.5 text-xs font-bold text-stone-700 transition hover:bg-stone-100">
+                    Mi Perfil
+                </a>
+
+                <form method="POST" action="{{ route('logout') }}" class="m-0 inline-flex items-center">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-red-600 px-3.5 text-xs font-bold text-white transition hover:bg-red-700">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
+    @endauth
     </nav>
 </header>
 
