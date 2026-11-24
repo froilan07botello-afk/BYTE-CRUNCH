@@ -65,10 +65,12 @@ class PedidoController extends Controller
 
         $total = round($total, 2);
 
-        $pedido= DB::transaction(function () use ($datos, $productos ,$total)
+       // $pedido= DB::transaction(function () use ($datos, $productos ,$total)
+       $pedido = DB::transaction(function () use ($request, $datos, $productos, $total)
         {
              // Guardamos los datos generales del pedido.
             $pedido = Pedido::create([
+                'user_id'=> $request->user()->id,
                 'nombre_cliente' => $datos['nombre_cliente'],
                 'telefono' => $datos['telefono'],
                 'direccion' => $datos['direccion'],
@@ -106,6 +108,7 @@ class PedidoController extends Controller
     public function index(): View
     {
         $pedidos = Pedido::with('detalles')
+            ->where('user_id', auth()->id())
             ->latest()
             ->get();
 
