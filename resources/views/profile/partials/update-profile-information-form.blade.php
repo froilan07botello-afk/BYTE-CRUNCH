@@ -1,4 +1,92 @@
 <section>
+    <header class="mb-4">
+        <h3 class="text-base font-semibold text-stone-900">
+            Información de la cuenta
+        </h3>
+        <p class="text-sm text-stone-500 mt-0.5">
+            Actualiza tu nombre y correo electrónico.
+        </p>
+    </header>
+
+    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+        @csrf
+    </form>
+
+    <form method="post" action="{{ route('profile.update') }}" class="space-y-4">
+        @csrf
+        @method('patch')
+
+        <div>
+            <label for="name" class="block text-sm font-medium text-stone-700 mb-1">Nombre</label>
+            <input
+                id="name"
+                name="name"
+                type="text"
+                value="{{ old('name', $user->name) }}"
+                required
+                autofocus
+                autocomplete="name"
+                class="w-full rounded-xl border-stone-300 text-sm text-stone-900 focus:border-orange-500 focus:ring-orange-500"
+            />
+            @error('name')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
+            <label for="email" class="block text-sm font-medium text-stone-700 mb-1">Correo electrónico</label>
+            <input
+                id="email"
+                name="email"
+                type="email"
+                value="{{ old('email', $user->email) }}"
+                required
+                autocomplete="username"
+                class="w-full rounded-xl border-stone-300 text-sm text-stone-900 focus:border-orange-500 focus:ring-orange-500"
+            />
+            @error('email')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+
+            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                <div class="mt-2 text-xs text-stone-600">
+                    Tu correo electrónico aún no está verificado.
+                    <button form="send-verification" class="underline text-orange-700 hover:text-orange-800">
+                        Reenviar correo de verificación
+                    </button>
+
+                    @if (session('status') === 'verification-link-sent')
+                        <p class="mt-1 font-medium text-emerald-700">
+                            Se envió un nuevo enlace de verificación a tu correo.
+                        </p>
+                    @endif
+                </div>
+            @endif
+        </div>
+
+        <div class="flex items-center gap-3 pt-1">
+            <button
+                type="submit"
+                class="rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 transition cursor-pointer"
+            >
+                Guardar cambios
+            </button>
+
+            @if (session('status') === 'profile-updated')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 2500)"
+                    class="text-xs font-medium text-emerald-700"
+                >
+                    Guardado.
+                </p>
+            @endif
+        </div>
+    </form>
+</section>
+{{--<section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
             {{ __('Profile Information') }}
@@ -61,4 +149,4 @@
             @endif
         </div>
     </form>
-</section>
+</section>--}}
