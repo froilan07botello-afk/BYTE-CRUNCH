@@ -1,42 +1,79 @@
 <?php
-use App\Http\Controllers\ProductoController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PedidoController;
+
 use App\Http\Controllers\Admin\PedidoAdminController;
 use App\Http\Controllers\Admin\ProductoAdminController;
+use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', [ProductoController::class, 'index']);
+// Ruta principal: muestra el login si no hay sesión, o redirige según el rol si ya está autenticado
+Route::get('/', function () {
+    if (Auth::check()) {
+        return (Auth::user()->rol ?? 'cliente') === 'admin'
+            ? redirect()->route('admin.pedidos.index')
+            : redirect()->route('catalogo.index');
+    }
 
-Route::get('/seguimiento', [PedidoController::class, 'index'])
-    ->name('pedidos.index');
+    return view('auth.login');
+})->name('inicio');
 
-Route::post('/pedidos', [PedidoController::class, 'store'])
-    ->name('pedidos.store');
+// Rutas exclusivas para usuarios con rol 'cliente'
+Route::middleware(['auth', 'rol:cliente'])->group(function () {
+    Route::get('/catalogo', [ProductoController::class, 'index'])
+        ->name('catalogo.index');
 
-Route::patch('/pedidos/{pedido}/estado', [PedidoController::class, 'actualizarEstado'])
-    ->name('pedidos.actualizarEstado');
+    Route::get('/seguimiento', [PedidoController::class, 'index'])
+        ->name('pedidos.index');
 
-// Rutas del Panel Administrativo
-Route::get('/admin/pedidos', [PedidoAdminController::class, 'index'])
-    ->name('admin.pedidos.index');
+    Route::post('/pedidos', [PedidoController::class, 'store'])
+        ->name('pedidos.store');
 
-Route::patch('/admin/pedidos/{pedido}/estado', [PedidoAdminController::class, 'actualizarEstado'])
-    ->name('admin.pedidos.actualizarEstado');
-// Rutas de Administración de Productos
-Route::get('/admin/productos', [ProductoAdminController::class, 'index'])
-    ->name('admin.productos.listar');
+    Route::patch('/pedidos/{pedido}/estado', [PedidoController::class, 'actualizarEstado'])
+        ->name('pedidos.actualizarEstado');
+});
 
-Route::get('/admin/productos/nuevo', [ProductoAdminController::class, 'crear'])
-    ->name('admin.productos.nuevo');
+// Rutas exclusivas para usuarios con rol 'admin'
+Route::middleware(['auth', 'rol:admin'])->prefix('admin')->group(function () {
+    // Pedidos
+    Route::get('/pedidos', [PedidoAdminController::class, 'index'])
+        ->name('admin.pedidos.index');
 
-Route::post('/admin/productos', [ProductoAdminController::class, 'guardar'])
-    ->name('admin.productos.guardar');
+    Route::patch('/pedidos/{pedido}/estado', [PedidoAdminController::class, 'actualizarEstado'])
+        ->name('admin.pedidos.actualizarEstado');
 
-Route::get('/admin/productos/{producto}/editar', [ProductoAdminController::class, 'editar'])
-    ->name('admin.productos.editar');
+    // Productos (nombres en español)
+    Route::get('/productos', [ProductoAdminController::class, 'index'])
+        ->name('admin.productos.listar');
 
-Route::patch('/admin/productos/{producto}', [ProductoAdminController::class, 'actualizar'])
-    ->name('admin.productos.actualizar');
+    Route::get('/productos/nuevo', [ProductoAdminController::class, 'crear'])
+        ->name('admin.productos.nuevo');
 
-Route::patch('/admin/productos/{producto}/disponibilidad', [ProductoAdminController::class, 'cambiarDisponibilidad'])
-    ->name('admin.productos.disponibilidad');
+    Route::post('/productos', [ProductoAdminController::class, 'guardar'])
+        ->name('admin.productos.guardar');
+
+    Route::get('/productos/{producto}/editar', [ProductoAdminController::class, 'editar'])
+        ->name('admin.productos.editar');
+
+    Route::patch('/productos/{producto}', [ProductoAdminController::class, 'actualizar'])
+        ->name('admin.productos.actualizar');
+
+    Route::patch('/productos/{producto}/disponibilidad', [ProductoAdminController::class, 'cambiarDisponibilidad'])
+        ->name('admin.productos.disponibilidad');
+});
+
+// Perfil de usuario autenticado (Breeze)
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/dashboard', function () {
+    return (Auth::user()->rol ?? 'cliente') === 'admin'
+        ? redirect()->route('admin.pedidos.index')
+        : redirect()->route('catalogo.index');
+    })->name('dashboard');
+});
+
+require __DIR__.'/auth.php';

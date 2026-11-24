@@ -10,18 +10,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password','rol'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+    //checamos si el usuario tiene rol de administrador
+    public function esAdmin(): bool
+    {
+         return $this->rol === 'admin';
+    }
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
+
+
     protected function casts(): array
     {
         return [
@@ -29,4 +36,5 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
 }

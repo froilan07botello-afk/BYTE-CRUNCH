@@ -7,7 +7,7 @@
     <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-3 px-4 py-3 sm:flex-nowrap sm:px-6 sm:py-4">
 
         <!-- Nombre del negocio -->
-        <a href="/"
+        <a href="{{ route('catalogo.index') }}"
            class="shrink-0 text-lg font-black tracking-tight text-amber-950 sm:text-2xl">
             BYTE <span class="text-orange-600">&amp;</span> CRUNCH
         </a>
@@ -27,6 +27,26 @@
             >
                 Mi pedido (<span id="cantidad-carrito">0</span>)
             </button>
+            @auth
+                        <div class="flex flex-wrap items-center gap-2.5 sm:border-l sm:border-stone-200 sm:pl-4">
+                <span class="rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-stone-800">
+                    {{ auth()->user()->name }}
+                </span>
+
+                <a href="{{ route('profile.edit') }}"
+                class="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 bg-white px-3.5 text-xs font-bold text-stone-700 transition hover:bg-stone-100">
+                    Mi Perfil
+                </a>
+
+                <form method="POST" action="{{ route('logout') }}" class="m-0 inline-flex items-center">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-red-600 px-3.5 text-xs font-bold text-white transition hover:bg-red-700">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
+            @endauth
 
         </div>
     </nav>
