@@ -30,17 +30,36 @@ class PedidoAdminController extends Controller
     }
 
     /**
-     * Actualiza el estado de un pedido desde el panel.
+     * Actualiza el estado de un pedido desde el panel y nos registra evidencia al entregar
      */
     public function actualizarEstado(Request $request, Pedido $pedido): RedirectResponse
     {
-        $datos = $request->validate([
+       $datos = $request->validate([
             'estado' => 'required|in:Pendiente,En preparación,Entregado',
+            'nota_entrega' => 'nullable|string|max:255',
+        ], [
+            'estado.required' => 'Selecciona un estado válido.',
+            'estado.in' => 'El estado seleccionado no es válido.',
+            'nota_entrega.max' => 'La nota de entrega no puede superar los 255 caracteres.',
         ]);
 
-        $pedido->update([
+        $notaLimpia = isset($datos['nota_entrega']) && trim($datos['nota_entrega']) !== ''
+            ? trim($datos['nota_entrega'])
+            : null;
+
+        $actualizacion = [
             'estado' => $datos['estado'],
-        ]);
+        ];
+
+        if ($datos['estado'] === 'Entregado') {
+            $actualizacion['entregado_en'] = $pedido->entregado_en ?? now();
+            $actualizacion['nota_entrega'] = $notaLimpia ?? $pedido->nota_entrega;
+        } else {
+            $actualizacion['entregado_en'] = null;
+            $actualizacion['nota_entrega'] = null;
+        }
+
+        $pedido->update($actualizacion);
 
         return redirect()->route('admin.pedidos.index')
             ->with('success', 'El estado del pedido se actualizó correctamente.');

@@ -74,7 +74,12 @@
             <article class="rounded-2xl border border-orange-100 bg-white p-6 shadow-sm">
                 <div class="flex flex-col gap-3 border-b border-orange-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="text-sm font-semibold text-stone-500">Folio: #{{ $pedido->id }}</p>
+                        <p class="text-sm font-semibold text-stone-500">
+                            Folio: #{{ $pedido->id }}
+                            @if ($pedido->codigo_entrega)
+                                · Código de entrega: <strong class="text-amber-950">{{ $pedido->codigo_entrega }}</strong>
+                            @endif
+                        </p>
                         <h2 class="mt-1 text-xl font-black text-amber-950 sm:text-2xl">
                             {{ $pedido->nombre_cliente }}
                         </h2>
@@ -92,10 +97,28 @@
                             <p class="mt-1"><strong>Referencia:</strong> {{ $pedido->referencia }}</p>
                         @endif
                     </div>
-                    <div>
+                    <div class="sm:text-right">
                         <p class="text-xs text-stone-500">Fecha: {{ $pedido->created_at->format('d/m/Y H:i') }}</p>
+                        <p class="mt-1 text-xs font-semibold text-stone-700">
+                            Pago: {{ ($pedido->metodo_pago ?? 'efectivo') === 'transferencia' ? 'Transferencia' : 'Efectivo' }}
+                            @if ($pedido->referencia_pago)
+                                <span class="font-normal text-stone-500">({{ $pedido->referencia_pago }})</span>
+                            @endif
+                        </p>
                     </div>
                 </div>
+
+                @if ($pedido->estado === 'Entregado' && ($pedido->entregado_en || $pedido->nota_entrega))
+                    <div class="mt-4 rounded-xl border border-green-200 bg-green-50/70 px-4 py-3 text-xs text-green-950">
+                        <p class="font-bold">Respaldo de entrega</p>
+                        @if ($pedido->entregado_en)
+                            <p class="mt-0.5">Entregado el: {{ $pedido->entregado_en->format('d/m/Y H:i') }}</p>
+                        @endif
+                        @if ($pedido->nota_entrega)
+                            <p class="mt-0.5">Nota: {{ $pedido->nota_entrega }}</p>
+                        @endif
+                    </div>
+                @endif
 
                 <!-- Productos del pedido -->
                 <div class="mt-5 rounded-xl bg-stone-50 p-4">
@@ -113,7 +136,7 @@
                     </p>
                 </div>
 
-                <!-- Formulario para cambiar estado -->
+                <!-- Formulario para cambiar estado y registrar nota de entrega -->
                 <form action="{{ route('admin.pedidos.actualizarEstado', $pedido) }}" method="POST" class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end border-t border-stone-100 pt-4">
                     @csrf
                     @method('PATCH')
@@ -127,7 +150,16 @@
                         <option value="Entregado" {{ $pedido->estado === 'Entregado' ? 'selected' : '' }}>Entregado</option>
                     </select>
 
-                    <button type="submit" class="rounded-xl bg-orange-600 px-4 py-2 text-sm font-bold text-white hover:bg-orange-700 transition">
+                    <input
+                        type="text"
+                        name="nota_entrega"
+                        maxlength="255"
+                        value="{{ old('nota_entrega', $pedido->nota_entrega) }}"
+                        placeholder="Nota de entrega (opcional)"
+                        class="w-full sm:w-56 rounded-xl border border-stone-300 px-3 py-2 text-sm text-stone-800 bg-white focus:outline-2 focus:outline-orange-500"
+                    >
+
+                    <button type="submit" class="cursor-pointer rounded-xl bg-orange-600 px-4 py-2 text-sm font-bold text-white hover:bg-orange-700 transition">
                         Actualizar
                     </button>
                 </form>
