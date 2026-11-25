@@ -18,12 +18,18 @@ class Pedido extends Model
         'referencia',
         'total',
         'estado',
+        'metodo_pago',
+        'referencia_pago',
+        'codigo_entrega',
+        'entregado_en',
+        'nota_entrega'
     ];
 
     protected function casts(): array
     {
         return [
             'total' => 'decimal:2',
+            'entregado_en'=>'datetime',
         ];
     }
     //agregamos la relacion "usuario"
