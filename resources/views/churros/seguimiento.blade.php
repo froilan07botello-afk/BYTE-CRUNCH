@@ -132,39 +132,33 @@
             {{-- Fecha --}}
             <p class="mt-1 text-xs text-stone-500">
                 Fecha: {{ $pedido->created_at->format('d/m/Y H:i') }}
-                <form action="{{ route('pedidos.actualizarEstado', $pedido) }}" method="POST" class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-                    @csrf
-                    @method('PATCH')
-
-                    <label for="estado-{{ $pedido->id }}" class="font-semibold text-stone-700">
-                        Actualizar estado:
-                    </label>
-
-                    <select
-                        id="estado-{{ $pedido->id }}"
-                        name="estado"
-                        class="rounded-lg border border-orange-200 p-2"
-                    >
-                        <option value="Pendiente" {{ $pedido->estado === 'Pendiente' ? 'selected' : '' }}>
-                            Pendiente
-                        </option>
-
-                        <option value="En preparación" {{ $pedido->estado === 'En preparación' ? 'selected' : '' }}>
-                            En preparación
-                        </option>
-
-                        <option value="Entregado" {{ $pedido->estado === 'Entregado' ? 'selected' : '' }}>
-                            Entregado
-                        </option>
-                    </select>
-
-                    <button
-                        type="submit"
-                        class="rounded-lg bg-orange-600 px-4 py-2 font-bold text-white hover:bg-orange-700"
-                    >
-                        Guardar estado
-                    </button>
-                </form>
+                <div class="mt-4 rounded-xl bg-orange-50/60 border border-orange-100 p-3.5 text-xs text-stone-700 space-y-1">
+                    <p>
+                        <strong>Método de pago:</strong>
+                        {{ ($pedido->metodo_pago ?? 'efectivo') === 'transferencia' ? 'Transferencia' : 'Efectivo' }}
+                        @if ($pedido->referencia_pago)
+                            <span class="text-stone-500">· Ref: {{ $pedido->referencia_pago }}</span>
+                        @endif
+                    </p>
+                    @if ($pedido->codigo_entrega)
+                        <p>
+                            <strong>Código de entrega:</strong>
+                            <span class="font-bold text-amber-950">{{ $pedido->codigo_entrega }}</span>
+                        </p>
+                    @endif
+                    @if ($pedido->estado === 'Entregado')
+                        @if ($pedido->entregado_en)
+                            <p class="text-green-800 font-medium">
+                                <strong>Entregado el:</strong> {{ $pedido->entregado_en->format('d/m/Y H:i') }}
+                            </p>
+                        @endif
+                        @if ($pedido->nota_entrega)
+                            <p class="text-green-800">
+                                <strong>Nota de entrega:</strong> {{ $pedido->nota_entrega }}
+                            </p>
+                        @endif
+                    @endif
+                </div>
             </p>
 
         </article>
