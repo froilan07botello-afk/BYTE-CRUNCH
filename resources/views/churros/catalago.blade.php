@@ -137,31 +137,40 @@
         <!-- RESUMEN TEMPORAL DEL PEDIDO -->
         <section id="resumen"
                  class="mt-8 hidden rounded-2xl
-                        border border-orange-200 bg-white p-5">
+                        border border-orange-200 bg-white p-5 sm:p-6">
 
-            <h2 class="text-xl font-black">
-                Tu selección
-            </h2>
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xl font-black text-amber-950">
+                    Tu selección
+                </h2>
+
+                <button
+                    type="button"
+                    id="vaciar-carrito"
+                    class="cursor-pointer rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-semibold text-stone-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+                >
+                    Vaciar pedido
+                </button>
+            </div>
 
             <ul id="lista-pedido"
-                class="mt-4 space-y-3">
+                class="mt-4 divide-y divide-stone-100">
             </ul>
 
             <div class="mt-5 flex items-center
                         justify-between border-t
                         border-stone-200 pt-4">
 
-                <span class="font-bold">Subtotal</span>
+                <span class="font-bold text-stone-800">Subtotal</span>
 
                 <span id="subtotal"
-                      class="text-xl font-black">
+                      class="text-xl font-black text-orange-600">
                     $0.00
                 </span>
             </div>
 
             <p class="mt-3 text-xs text-stone-500">
-                el subtotal no incluye entrega.
-
+                El subtotal no incluye costo de entrega.
             </p>
         </section>
 
@@ -363,24 +372,59 @@
     </footer>
 
     <!-- INTERACCIÓN TEMPORAL EN EL NAVEGADOR -->
+    <!-- INTERACCIÓN DEL CARRITO EN EL NAVEGADOR -->
     <script>
+        const MAX_CANTIDAD_PRODUCTO = 50;
         const carrito = [];
-        const cantidadCarrito =
-            document.getElementById('cantidad-carrito');
+        const cantidadCarrito = document.getElementById('cantidad-carrito');
         const mensaje = document.getElementById('mensaje');
         const resumen = document.getElementById('resumen');
         const listaPedido = document.getElementById('lista-pedido');
         const subtotalElemento = document.getElementById('subtotal');
         const formularioPedido = document.getElementById('formulario-pedido');
         const formulario = document.getElementById('form-pedido');
-        const confirmacion = document.getElementById('confirmacion-pedido');
-        const mensajeConfirmacion = document.getElementById('mensaje-confirmacion');
+        const btnVaciarCarrito = document.getElementById('vaciar-carrito');
 
         function dinero(cantidad) {
             return cantidad.toLocaleString('es-MX', {
                 style: 'currency',
                 currency: 'MXN'
             });
+        }
+
+        function mostrarAviso(texto) {
+            if (!mensaje) return;
+            mensaje.textContent = texto;
+            mensaje.classList.remove('hidden');
+        }
+
+        function cambiarCantidad(id, delta) {
+            const indice = carrito.findIndex((item) => item.id === id);
+            if (indice === -1) return;
+
+            const producto = carrito[indice];
+            const nuevaCantidad = producto.cantidad + delta;
+
+            if (nuevaCantidad <= 0) {
+                carrito.splice(indice, 1);
+                mostrarAviso(`${producto.nombre} se quitó de tu pedido.`);
+            } else if (nuevaCantidad > MAX_CANTIDAD_PRODUCTO) {
+                mostrarAviso(`Puedes pedir máximo ${MAX_CANTIDAD_PRODUCTO} unidades de ${producto.nombre}.`);
+                return;
+            } else {
+                producto.cantidad = nuevaCantidad;
+            }
+
+            actualizarCarrito();
+        }
+
+        function eliminarProducto(id) {
+            const indice = carrito.findIndex((item) => item.id === id);
+            if (indice === -1) return;
+
+            const [eliminado] = carrito.splice(indice, 1);
+            actualizarCarrito();
+            mostrarAviso(`${eliminado.nombre} se eliminó de tu pedido.`);
         }
 
         function actualizarCarrito() {
@@ -390,8 +434,7 @@
             );
 
             const subtotal = carrito.reduce(
-                (total, producto) =>
-                    total + producto.precio * producto.cantidad,
+                (total, producto) => total + producto.precio * producto.cantidad,
                 0
             );
 
@@ -400,19 +443,62 @@
 
             carrito.forEach((producto) => {
                 const elemento = document.createElement('li');
-                elemento.className =
-                    'flex items-center justify-between gap-3 text-sm';
+                elemento.className = 'flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between';
 
-                const nombre = document.createElement('span');
-                nombre.textContent =
-                    `${producto.nombre} × ${producto.cantidad}`;
+                // Info del producto (nombre y precio unitario)
+                const info = document.createElement('div');
+                info.className = 'min-w-0';
 
-                const precio = document.createElement('span');
-                precio.className = 'font-bold';
-                precio.textContent =
-                    dinero(producto.precio * producto.cantidad);
+                const nombre = document.createElement('p');
+                nombre.className = 'text-sm font-bold text-stone-900';
+                nombre.textContent = producto.nombre;
 
-                elemento.append(nombre, precio);
+                const precioUnitario = document.createElement('p');
+                precioUnitario.className = 'text-xs text-stone-500';
+                precioUnitario.textContent = `${dinero(producto.precio)} c/u`;
+
+                info.append(nombre, precioUnitario);
+
+                // Controles (- cantidad +), subtotal del ítem y botón quitar
+                const controles = document.createElement('div');
+                controles.className = 'flex items-center justify-between gap-3 sm:justify-end';
+
+                const grupoCantidad = document.createElement('div');
+                grupoCantidad.className = 'inline-flex items-center rounded-xl border border-stone-200 bg-stone-50 p-0.5';
+
+                const btnRestar = document.createElement('button');
+                btnRestar.type = 'button';
+                btnRestar.setAttribute('aria-label', `Disminuir cantidad de ${producto.nombre}`);
+                btnRestar.className = 'flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-sm font-black text-stone-700 transition hover:bg-white hover:text-orange-600';
+                btnRestar.textContent = '−';
+                btnRestar.addEventListener('click', () => cambiarCantidad(producto.id, -1));
+
+                const spanCantidad = document.createElement('span');
+                spanCantidad.className = 'min-w-8 px-2 text-center text-sm font-bold text-stone-900';
+                spanCantidad.textContent = producto.cantidad;
+
+                const btnSumar = document.createElement('button');
+                btnSumar.type = 'button';
+                btnSumar.setAttribute('aria-label', `Aumentar cantidad de ${producto.nombre}`);
+                btnSumar.className = 'flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-sm font-black text-stone-700 transition hover:bg-white hover:text-orange-600';
+                btnSumar.textContent = '+';
+                btnSumar.addEventListener('click', () => cambiarCantidad(producto.id, 1));
+
+                grupoCantidad.append(btnRestar, spanCantidad, btnSumar);
+
+                const precioTotalItem = document.createElement('span');
+                precioTotalItem.className = 'min-w-20 text-right text-sm font-black text-stone-900';
+                precioTotalItem.textContent = dinero(producto.precio * producto.cantidad);
+
+                const btnEliminar = document.createElement('button');
+                btnEliminar.type = 'button';
+                btnEliminar.setAttribute('aria-label', `Quitar ${producto.nombre}`);
+                btnEliminar.className = 'cursor-pointer rounded-lg px-2 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-50';
+                btnEliminar.textContent = 'Quitar';
+                btnEliminar.addEventListener('click', () => eliminarProducto(producto.id));
+
+                controles.append(grupoCantidad, precioTotalItem, btnEliminar);
+                elemento.append(info, controles);
                 listaPedido.appendChild(elemento);
             });
 
@@ -423,20 +509,22 @@
 
         document.querySelectorAll('[data-agregar]').forEach((boton) => {
             boton.addEventListener('click', () => {
-                const id= Number(boton.dataset.productoId);
+                const id = Number(boton.dataset.productoId);
                 const nombre = boton.dataset.producto;
                 const precio = Number(boton.dataset.precio);
 
-                 if (!Number.isInteger(id) || id <= 0 ||
+                if (!Number.isInteger(id) || id <= 0 ||
                     !nombre || !Number.isFinite(precio) || precio <= 0) {
                     return;
-                    }
+                }
 
-                const existente = carrito.find(
-                    producto => producto.id === id
-                );
+                const existente = carrito.find((producto) => producto.id === id);
 
                 if (existente) {
+                    if (existente.cantidad >= MAX_CANTIDAD_PRODUCTO) {
+                        mostrarAviso(`Puedes pedir máximo ${MAX_CANTIDAD_PRODUCTO} unidades de ${nombre}.`);
+                        return;
+                    }
                     existente.cantidad++;
                 } else {
                     carrito.push({
@@ -448,19 +536,21 @@
                 }
 
                 actualizarCarrito();
-
-                mensaje.textContent =
-                    `${nombre} se agregó a tu pedido.`;
-                mensaje.classList.remove('hidden');
+                mostrarAviso(`${nombre} se agregó a tu pedido.`);
             });
+        });
+
+        btnVaciarCarrito?.addEventListener('click', () => {
+            if (carrito.length === 0) return;
+            carrito.length = 0;
+            actualizarCarrito();
+            mostrarAviso('Se vació tu pedido.');
         });
 
         document.getElementById('ver-pedido')
             .addEventListener('click', () => {
                 if (carrito.length === 0) {
-                    mensaje.textContent =
-                        'Tu pedido está vacío. ¡Agrega un churro para comenzar!';
-                    mensaje.classList.remove('hidden');
+                    mostrarAviso('Tu pedido está vacío. ¡Agrega un churro para comenzar!');
                     return;
                 }
 
@@ -470,38 +560,30 @@
                 });
             });
 
-
-
         formulario.addEventListener('submit', (evento) => {
-        if (carrito.length === 0) {
-            evento.preventDefault();
+            if (carrito.length === 0) {
+                evento.preventDefault();
+                mostrarAviso('Agrega un churro antes de confirmar.');
+                return;
+            }
 
-            mensaje.textContent = 'Agrega un churro antes de confirmar.';
-            mensaje.classList.remove('hidden');
-            return;
-        }
+            const contenedorProductos = document.getElementById('productos-ocultos');
+            contenedorProductos.replaceChildren();
 
-        const contenedorProductos = document.getElementById('productos-ocultos');
+            carrito.forEach((producto, indice) => {
+                const inputId = document.createElement('input');
+                inputId.type = 'hidden';
+                inputId.name = `productos[${indice}][id]`;
+                inputId.value = producto.id;
 
-        // Eliminamos campos anteriores para evitar duplicados.
-        contenedorProductos.replaceChildren();
-
-        // Enviamos únicamente el ID y la cantidad de cada producto.
-        carrito.forEach((producto, indice) =>
-        {
-            const inputId = document.createElement('input');
-            inputId.type = 'hidden';
-            inputId.name = `productos[${indice}][id]`;
-            inputId.value = producto.id;
-
-            const inputCantidad = document.createElement('input');
-            inputCantidad.type = 'hidden';
-            inputCantidad.name = `productos[${indice}][cantidad]`;
-            inputCantidad.value = producto.cantidad;
-            contenedorProductos.append(inputId, inputCantidad);
-         });
-     });
- </script>
+                const inputCantidad = document.createElement('input');
+                inputCantidad.type = 'hidden';
+                inputCantidad.name = `productos[${indice}][cantidad]`;
+                inputCantidad.value = producto.cantidad;
+                contenedorProductos.append(inputId, inputCantidad);
+            });
+        });
+    </script>
  <script>
 (() => {
     const formPedido = document.getElementById('form-pedido');
