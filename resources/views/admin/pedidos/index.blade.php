@@ -4,35 +4,38 @@
 
 @section('content')
 <header class="border-b border-orange-100 bg-white shadow-sm">
-    <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <a href="/" class="text-xl font-black text-amber-950">
-            BYTE <span class="text-orange-600">&</span> CRUNCH
+    <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-3 px-4 py-3 sm:flex-nowrap sm:px-6 sm:py-4">
+        <a href="/" class="shrink-0 text-xl font-black text-amber-950">
+            BYTE <span class="text-orange-600">&amp;</span> CRUNCH
         </a>
-        <div class="flex items-center gap-3">
-            <a href= "{{ route('admin.productos.listar') }}" class="rounded-xl bg-amber-950 px-4 py-2 text-sm font-bold text-white hover:bg-amber-900">
+
+        <div class="flex flex-wrap items-center justify-end gap-2.5 sm:gap-3">
+            <a href="{{ route('admin.productos.listar') }}"
+               class="inline-flex h-9 items-center justify-center rounded-xl bg-amber-950 px-4 text-xs font-bold text-white transition hover:bg-amber-900 sm:text-sm">
                 Ver Productos
             </a>
-        </div>
+
             @auth
-            <div class="flex flex-wrap items-center gap-2.5 sm:border-l sm:border-stone-200 sm:pl-4">
-                <span class="rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-stone-800">
-                    {{ auth()->user()->name }}
-                </span>
+                <div class="flex flex-wrap items-center gap-2.5 sm:border-l sm:border-stone-200 sm:pl-4">
+                    <span class="rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-stone-800">
+                        {{ auth()->user()->name }}
+                    </span>
 
-                <a href="{{ route('profile.edit') }}"
-                class="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 bg-white px-3.5 text-xs font-bold text-stone-700 transition hover:bg-stone-100">
-                    Mi Perfil
-                </a>
+                    <a href="{{ route('profile.edit') }}"
+                       class="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 bg-white px-3.5 text-xs font-bold text-stone-700 transition hover:bg-stone-100">
+                        Mi Perfil
+                    </a>
 
-                <form method="POST" action="{{ route('logout') }}" class="m-0 inline-flex items-center">
-                    @csrf
-                    <button type="submit"
-                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-red-600 px-3.5 text-xs font-bold text-white transition hover:bg-red-700">
-                        Cerrar sesión
-                    </button>
-                </form>
-            </div>
-    @endauth
+                    <form method="POST" action="{{ route('logout') }}" class="m-0 inline-flex items-center">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-red-600 px-3.5 text-xs font-bold text-white transition hover:bg-red-700">
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+            @endauth
+        </div>
     </nav>
 </header>
 
@@ -65,52 +68,6 @@
             <p class="mt-2 text-3xl font-black text-orange-600">${{ number_format($ventasHoy, 2) }}</p>
         </article>
     </section>
-
-    <!-- Barra de filtros y buscador de pedidos -->
-    <section class="mb-6 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex flex-wrap items-center gap-2">
-                @foreach (['Todos', 'Pendiente', 'En preparación', 'Entregado'] as $estadoItem)
-                    <a
-                        href="{{ route('admin.pedidos.index', array_filter([
-                            'estado' => $estadoItem === 'Todos' ? null : $estadoItem,
-                            'buscar' => $busqueda !== '' ? $busqueda : null,
-                        ])) }}"
-                        class="rounded-xl px-3.5 py-2 text-xs font-bold transition {{ $estadoFiltro === $estadoItem ? 'bg-amber-950 text-white' : 'bg-orange-50 text-amber-950 hover:bg-orange-100' }}"
-                    >
-                        {{ $estadoItem }}
-                    </a>
-                @endforeach
-            </div>
-
-            <form method="GET" action="{{ route('admin.pedidos.index') }}" class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
-                @if ($estadoFiltro !== 'Todos')
-                    <input type="hidden" name="estado" value="{{ $estadoFiltro }}">
-                @endif
-
-                <input
-                    type="text"
-                    name="buscar"
-                    value="{{ $busqueda }}"
-                    placeholder="Buscar folio, cliente, teléfono o código..."
-                    class="w-full sm:w-64 rounded-xl border border-stone-300 px-3.5 py-2 text-sm text-stone-900 focus:border-orange-500 focus:outline-2 focus:outline-orange-500"
-                >
-
-                <div class="flex items-center gap-2">
-                    <button type="submit" class="cursor-pointer rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-orange-700">
-                        Buscar
-                    </button>
-
-                    @if ($busqueda !== '' || $estadoFiltro !== 'Todos')
-                        <a href="{{ route('admin.pedidos.index') }}" class="rounded-xl border border-stone-300 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-stone-100">
-                            Limpiar
-                        </a>
-                    @endif
-                </div>
-            </form>
-        </div>
-    </section>
-
     <!-- Listado de Pedidos -->
     <section class="space-y-5">
         @if (session('success'))
