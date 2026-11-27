@@ -4,35 +4,38 @@
 
 @section('content')
 <header class="border-b border-orange-100 bg-white shadow-sm">
-    <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <a href="/" class="text-xl font-black text-amber-950">
-            BYTE <span class="text-orange-600">&</span> CRUNCH
+    <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-3 px-4 py-3 sm:flex-nowrap sm:px-6 sm:py-4">
+        <a href="/" class="shrink-0 text-xl font-black text-amber-950">
+            BYTE <span class="text-orange-600">&amp;</span> CRUNCH
         </a>
-        <div class="flex items-center gap-3">
-            <a href= "{{ route('admin.productos.listar') }}" class="rounded-xl bg-amber-950 px-4 py-2 text-sm font-bold text-white hover:bg-amber-900">
+
+        <div class="flex flex-wrap items-center justify-end gap-2.5 sm:gap-3">
+            <a href="{{ route('admin.productos.listar') }}"
+               class="inline-flex h-9 items-center justify-center rounded-xl bg-amber-950 px-4 text-xs font-bold text-white transition hover:bg-amber-900 sm:text-sm">
                 Ver Productos
             </a>
-        </div>
+
             @auth
-            <div class="flex flex-wrap items-center gap-2.5 sm:border-l sm:border-stone-200 sm:pl-4">
-                <span class="rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-stone-800">
-                    {{ auth()->user()->name }}
-                </span>
+                <div class="flex flex-wrap items-center gap-2.5 sm:border-l sm:border-stone-200 sm:pl-4">
+                    <span class="rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-stone-800">
+                        {{ auth()->user()->name }}
+                    </span>
 
-                <a href="{{ route('profile.edit') }}"
-                class="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 bg-white px-3.5 text-xs font-bold text-stone-700 transition hover:bg-stone-100">
-                    Mi Perfil
-                </a>
+                    <a href="{{ route('profile.edit') }}"
+                       class="inline-flex h-9 items-center justify-center rounded-xl border border-stone-300 bg-white px-3.5 text-xs font-bold text-stone-700 transition hover:bg-stone-100">
+                        Mi Perfil
+                    </a>
 
-                <form method="POST" action="{{ route('logout') }}" class="m-0 inline-flex items-center">
-                    @csrf
-                    <button type="submit"
-                            class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-red-600 px-3.5 text-xs font-bold text-white transition hover:bg-red-700">
-                        Cerrar sesión
-                    </button>
-                </form>
-            </div>
-    @endauth
+                    <form method="POST" action="{{ route('logout') }}" class="m-0 inline-flex items-center">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex h-9 cursor-pointer items-center justify-center rounded-xl bg-red-600 px-3.5 text-xs font-bold text-white transition hover:bg-red-700">
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+            @endauth
+        </div>
     </nav>
 </header>
 
@@ -46,8 +49,8 @@
         </p>
     </section>
 
-    <!-- Resumen de estados -->
-    <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <!-- Resumen de estados y ventas de hoy -->
+    <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <article class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
             <p class="text-sm font-semibold text-amber-900">Pendientes</p>
             <p class="mt-2 text-3xl font-black text-amber-950">{{ $totalPendientes }}</p>
@@ -60,8 +63,11 @@
             <p class="text-sm font-semibold text-green-900">Entregados</p>
             <p class="mt-2 text-3xl font-black text-green-950">{{ $totalEntregados }}</p>
         </article>
+        <article class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+            <p class="text-sm font-semibold text-stone-600">Ventas de hoy</p>
+            <p class="mt-2 text-3xl font-black text-orange-600">${{ number_format($ventasHoy, 2) }}</p>
+        </article>
     </section>
-
     <!-- Listado de Pedidos -->
     <section class="space-y-5">
         @if (session('success'))

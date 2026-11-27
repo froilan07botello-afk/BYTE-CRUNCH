@@ -11,21 +11,61 @@ use Illuminate\Http\RedirectResponse;
 class PedidoAdminController extends Controller
 {
     /*
-     Nos mostrara los pedidos que se han hecho y los mostrara en el panel administrativo
+     Nos mostrara los pedidos que se han hecho y los mostrara en el panel administrativo con filtro por estado y busqueda
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $pedidos = Pedido::with('detalles')->latest()->get();
+       // 1. Leemos los filtros que vienen en la URL (?estado=...&buscar=...)
+        $estadoFiltro = $request->query('estado', 'Todos');
+        $busqueda = trim((string) $request->query('buscar', ''));
 
-        $totalPendientes = $pedidos->where('estado', 'Pendiente')->count();
-        $totalPreparacion = $pedidos->where('estado', 'En preparación')->count();
-        $totalEntregados = $pedidos->where('estado', 'Entregado')->count();
+        // Validamos que el estado sea uno de los permitidos
+        $estadosPermitidos = ['Todos', 'Pendiente', 'En preparación', 'Entregado'];
+        if (!in_array($estadoFiltro, $estadosPermitidos, true)) {
+            $estadoFiltro = 'Todos';
+        }
+
+        // 2. Calculamos los contadores globales para las tarjetas superiores
+        $totalPendientes = Pedido::where('estado', 'Pendiente')->count();
+        $totalPreparacion = Pedido::where('estado', 'En preparación')->count();
+        $totalEntregados = Pedido::where('estado', 'Entregado')->count();
+        $inicioDia = now('America/Mexico_City')->startOfDay()->utc();
+        $finDia = now('America/Mexico_City')->endOfDay()->utc();
+
+        $ventasHoy = (float) Pedido::whereBetween('created_at', [$inicioDia, $finDia])
+            ->sum('total');
+        // 3. Armamos la consulta de pedidos aplicando los filtros elegidos
+        $consulta = Pedido::with('detalles')->latest();
+
+        if ($estadoFiltro !== 'Todos') {
+            $consulta->where('estado', $estadoFiltro);
+        }
+
+        if ($busqueda !== '') {
+            // Si el admin escribe "#15" o "15", buscamos también por ID exacto
+            $folioNumerico = ltrim($busqueda, '#');
+
+            $consulta->where(function ($q) use ($busqueda, $folioNumerico) {
+                if (ctype_digit($folioNumerico)) {
+                    $q->orWhere('id', (int) $folioNumerico);
+                }
+
+                $q->orWhere('nombre_cliente', 'like', "%{$busqueda}%")
+                  ->orWhere('telefono', 'like', "%{$busqueda}%")
+                  ->orWhere('codigo_entrega', 'like', "%{$busqueda}%");
+            });
+        }
+
+        $pedidos = $consulta->get();
 
         return view('admin.pedidos.index', compact(
             'pedidos',
             'totalPendientes',
             'totalPreparacion',
-            'totalEntregados'
+            'totalEntregados',
+            'ventasHoy',
+            'estadoFiltro',
+            'busqueda'
         ));
     }
 
