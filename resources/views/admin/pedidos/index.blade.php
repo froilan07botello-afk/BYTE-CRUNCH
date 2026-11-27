@@ -46,8 +46,8 @@
         </p>
     </section>
 
-    <!-- Resumen de estados -->
-    <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <!-- Resumen de estados y ventas de hoy -->
+    <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <article class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
             <p class="text-sm font-semibold text-amber-900">Pendientes</p>
             <p class="mt-2 text-3xl font-black text-amber-950">{{ $totalPendientes }}</p>
@@ -60,6 +60,55 @@
             <p class="text-sm font-semibold text-green-900">Entregados</p>
             <p class="mt-2 text-3xl font-black text-green-950">{{ $totalEntregados }}</p>
         </article>
+        <article class="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
+            <p class="text-sm font-semibold text-stone-600">Ventas de hoy</p>
+            <p class="mt-2 text-3xl font-black text-orange-600">${{ number_format($ventasHoy, 2) }}</p>
+        </article>
+    </section>
+
+    <!-- Barra de filtros y buscador de pedidos -->
+    <section class="mb-6 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex flex-wrap items-center gap-2">
+                @foreach (['Todos', 'Pendiente', 'En preparación', 'Entregado'] as $estadoItem)
+                    <a
+                        href="{{ route('admin.pedidos.index', array_filter([
+                            'estado' => $estadoItem === 'Todos' ? null : $estadoItem,
+                            'buscar' => $busqueda !== '' ? $busqueda : null,
+                        ])) }}"
+                        class="rounded-xl px-3.5 py-2 text-xs font-bold transition {{ $estadoFiltro === $estadoItem ? 'bg-amber-950 text-white' : 'bg-orange-50 text-amber-950 hover:bg-orange-100' }}"
+                    >
+                        {{ $estadoItem }}
+                    </a>
+                @endforeach
+            </div>
+
+            <form method="GET" action="{{ route('admin.pedidos.index') }}" class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                @if ($estadoFiltro !== 'Todos')
+                    <input type="hidden" name="estado" value="{{ $estadoFiltro }}">
+                @endif
+
+                <input
+                    type="text"
+                    name="buscar"
+                    value="{{ $busqueda }}"
+                    placeholder="Buscar folio, cliente, teléfono o código..."
+                    class="w-full sm:w-64 rounded-xl border border-stone-300 px-3.5 py-2 text-sm text-stone-900 focus:border-orange-500 focus:outline-2 focus:outline-orange-500"
+                >
+
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="cursor-pointer rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-orange-700">
+                        Buscar
+                    </button>
+
+                    @if ($busqueda !== '' || $estadoFiltro !== 'Todos')
+                        <a href="{{ route('admin.pedidos.index') }}" class="rounded-xl border border-stone-300 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-stone-100">
+                            Limpiar
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
     </section>
 
     <!-- Listado de Pedidos -->

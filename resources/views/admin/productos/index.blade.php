@@ -6,7 +6,7 @@
 <header class="border-b border-orange-100 bg-white shadow-sm">
     <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <a href="{{ route('admin.pedidos.index') }}" class="text-xl font-black text-amber-950">
-            BYTE <span class="text-orange-600">&</span> CRUNCH <span class="ml-2 rounded-md bg-orange-100 px-2 py-1 text-xs font-bold text-orange-800">Admin</span>
+            BYTE <span class="text-orange-600">&</span> CRUNCH
         </a>
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.pedidos.index') }}" class="rounded-xl border border-stone-300 px-4 py-2 text-sm font-bold text-stone-700 hover:bg-stone-100">
@@ -18,17 +18,57 @@
 </header>
 
 <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-3xl font-black text-amber-950 sm:text-4xl">
                 Catálogo de Productos
             </h1>
-            <p class="mt-2 text-stone-600">
+            <p class="mt-2 text-sm text-stone-600">
+                Administra precios, descripciones y disponibilidad inmediata en el menú.
             </p>
         </div>
         <a href="{{ route('admin.productos.nuevo') }}" class="inline-flex items-center justify-center rounded-xl bg-orange-600 px-5 py-3 font-bold text-white shadow-sm transition hover:bg-orange-700">
             + Nuevo Churro
         </a>
+    </div>
+
+    <!-- Barra de filtros rápidos de productos -->
+    <div class="mb-6 flex flex-col gap-3 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.productos.listar', array_filter(['buscar' => $busqueda !== '' ? $busqueda : null])) }}"
+               class="rounded-xl px-3.5 py-2 text-xs font-bold transition {{ $filtroDisponibilidad === 'todos' ? 'bg-amber-950 text-white' : 'bg-orange-50 text-amber-950 hover:bg-orange-100' }}">
+                Todos ({{ $totalDisponibles + $totalNoDisponibles }})
+            </a>
+            <a href="{{ route('admin.productos.listar', array_filter(['disponibilidad' => 'disponibles', 'buscar' => $busqueda !== '' ? $busqueda : null])) }}"
+               class="rounded-xl px-3.5 py-2 text-xs font-bold transition {{ $filtroDisponibilidad === 'disponibles' ? 'bg-green-700 text-white' : 'bg-green-50 text-green-800 hover:bg-green-100' }}">
+                Disponibles ({{ $totalDisponibles }})
+            </a>
+            <a href="{{ route('admin.productos.listar', array_filter(['disponibilidad' => 'agotados', 'buscar' => $busqueda !== '' ? $busqueda : null])) }}"
+               class="rounded-xl px-3.5 py-2 text-xs font-bold transition {{ $filtroDisponibilidad === 'agotados' ? 'bg-stone-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200' }}">
+                No disponibles ({{ $totalNoDisponibles }})
+            </a>
+        </div>
+
+        <form method="GET" action="{{ route('admin.productos.listar') }}" class="flex items-center gap-2">
+            @if ($filtroDisponibilidad !== 'todos')
+                <input type="hidden" name="disponibilidad" value="{{ $filtroDisponibilidad }}">
+            @endif
+            <input
+                type="text"
+                name="buscar"
+                value="{{ $busqueda }}"
+                placeholder="Buscar churro..."
+                class="w-full sm:w-52 rounded-xl border border-stone-300 px-3.5 py-2 text-sm text-stone-900 focus:border-orange-500 focus:outline-2 focus:outline-orange-500"
+            >
+            <button type="submit" class="cursor-pointer rounded-xl bg-orange-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-orange-700">
+                Buscar
+            </button>
+            @if ($busqueda !== '' || $filtroDisponibilidad !== 'todos')
+                <a href="{{ route('admin.productos.listar') }}" class="rounded-xl border border-stone-300 px-3 py-2 text-xs font-bold text-stone-600 hover:bg-stone-100">
+                    Limpiar
+                </a>
+            @endif
+        </form>
     </div>
 
     @if (session('success'))

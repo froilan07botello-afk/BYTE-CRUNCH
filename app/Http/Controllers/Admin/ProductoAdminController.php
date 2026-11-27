@@ -11,12 +11,38 @@ use Illuminate\Http\RedirectResponse;
 class ProductoAdminController extends Controller
 {
     /**
-     * Muestra el listado de productos en el panel administrativo.
+     * Muestra el listado de productos en el panel administrativo con filtros rapidos.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $productos = Producto::orderBy('id', 'desc')->get();
-        return view('admin.productos.index', compact('productos'));
+       $filtroDisponibilidad = $request->query('disponibilidad', 'todos');
+        $busqueda = trim((string) $request->query('buscar', ''));
+
+        $consulta = Producto::orderBy('id', 'desc');
+
+        if ($filtroDisponibilidad === 'disponibles') {
+            $consulta->where('disponible', true);
+        } elseif ($filtroDisponibilidad === 'agotados') {
+            $consulta->where('disponible', false);
+        } else {
+            $filtroDisponibilidad = 'todos';
+        }
+
+        if ($busqueda !== '') {
+            $consulta->where('nombre', 'like', "%{$busqueda}%");
+        }
+
+        $productos = $consulta->get();
+        $totalDisponibles = Producto::where('disponible', true)->count();
+        $totalNoDisponibles = Producto::where('disponible', false)->count();
+
+        return view('admin.productos.index', compact(
+            'productos',
+            'filtroDisponibilidad',
+            'busqueda',
+            'totalDisponibles',
+            'totalNoDisponibles'
+        ));
     }
 
     /**
